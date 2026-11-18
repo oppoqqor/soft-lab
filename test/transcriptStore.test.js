@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, test } from "node:test";
+import { createAppServer } from "../src/server.js";
 import { TranscriptStore } from "../src/transcriptStore.js";
 
 describe("TranscriptStore", () => {
@@ -61,5 +62,34 @@ describe("TranscriptStore", () => {
     assert.deepEqual(store.getStudentIDs("  grace lee "), [studentID]);
     assert.deepEqual(store.getStudentIDs("GRACE LEE"), [studentID]);
     assert.equal(store.getTranscript(studentID).student.studentName, "Grace Lee");
+  test("throws when adding a second grade for the same course", () => {
+    const studentID = store.addStudent("Lin");
+    store.addGrade(studentID, "cs360", 85);
+
+    assert.throws(
+      () => store.addGrade(studentID, "CS360", 90),
+      /Grade already exists for course CS360/,
+    );
+    assert.deepEqual(store.changeGrade(studentID, "CS360", 90), {
+      studentID,
+      course: "CS360",
+      grade: 90,
+    });
+  test("deleting a student removes their grades and returns 404", async () => {
+    const studentID = store.addStudent("Ada");
+    store.addGrade(studentID, "CS360", 90);
+    store.deleteStudent(studentID);
+
+    assert.equal(store.getGrade(studentID, "CS360"), undefined);
+
+    const server = createAppServer(store);
+    await new Promise((resolve) => server.listen(0, resolve));
+    try {
+      const { port } = server.address();
+      const response = await fetch(`http://localhost:${port}/transcripts/${studentID}/CS360`);
+      assert.equal(response.status, 404);
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
   });
 });
