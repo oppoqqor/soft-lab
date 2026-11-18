@@ -62,6 +62,8 @@ describe("TranscriptStore", () => {
     assert.deepEqual(store.getStudentIDs("  grace lee "), [studentID]);
     assert.deepEqual(store.getStudentIDs("GRACE LEE"), [studentID]);
     assert.equal(store.getTranscript(studentID).student.studentName, "Grace Lee");
+  });
+
   test("throws when adding a second grade for the same course", () => {
     const studentID = store.addStudent("Lin");
     store.addGrade(studentID, "cs360", 85);
@@ -75,6 +77,8 @@ describe("TranscriptStore", () => {
       course: "CS360",
       grade: 90,
     });
+  });
+
   test("deleting a student removes their grades and returns 404", async () => {
     const studentID = store.addStudent("Ada");
     store.addGrade(studentID, "CS360", 90);
