@@ -15,9 +15,10 @@ export class TranscriptStore {
   }
 
   getStudentIDs(name) {
+    const query = name === undefined ? undefined : String(name).trim().toLowerCase();
     const matches = [];
     for (const student of this.#students.values()) {
-      if (name === undefined || student.studentName === String(name)) {
+      if (query === undefined || student.studentName.toLowerCase() === query) {
         matches.push(student.studentID);
       }
     }
