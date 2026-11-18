@@ -56,6 +56,19 @@ describe("TranscriptStore", () => {
     assert.throws(() => store.deleteStudent(secondID), /Student not found/);
   });
 
+  test("throws when adding a second grade for the same course", () => {
+    const studentID = store.addStudent("Lin");
+    store.addGrade(studentID, "cs360", 85);
+
+    assert.throws(
+      () => store.addGrade(studentID, "CS360", 90),
+      /Grade already exists for course CS360/,
+    );
+    assert.deepEqual(store.changeGrade(studentID, "CS360", 90), {
+      studentID,
+      course: "CS360",
+      grade: 90,
+    });
   test("deleting a student removes their grades and returns 404", async () => {
     const studentID = store.addStudent("Ada");
     store.addGrade(studentID, "CS360", 90);
